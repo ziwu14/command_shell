@@ -1,0 +1,150 @@
+Test cases covered for this shell program
+
+For step1, the shell hasn't split the command line into arguments
+1.test command with line absolute path and with at most one arguments
+/bin/pwd, /bin/ls, /bin/ps
+
+2.test program with relative path (search ECE551PATH)
+ls, pwd, ps
+
+3.test program with relative path located in the current directory
+3.1 test executable program "print_args" (in the same directory as the shell.cpp)
+this is a simple program which print argv, envps received from the shell
+Notice that unike a real shell which run program under current directory with "./myProgram", my shell run with "myProgram"
+3.2 test non-executable program such as README(should return "Command README not found")
+
+4.test empty command
+4.1 i.e. press enter directly 
+4.2 $a (a is of empty value)
+
+5.test program which does't exist
+5.1 abababab
+
+6.run a program successfully
+6.1 pwd
+
+7.kill a program by signal (ps aux to inspect pid)
+test with program "endless_loop" (in the same directory as the shell.cpp), which just has a line while(1);
+"ctrl+z" to suspend the shell then
+"ps aux | grep [mynetid]" to find the child process endless_loop 
+7.1 kill -STOP [pid]
+7.2 kill -CONT [pid]
+7.3 kill -TERM [pid]
+go back to myshell to check the exit statu of the child program
+
+8.check if the shell exit normally
+8.1 type exit to the prompt (with some spcs)
+   exit
+8.2 ctrl+d(indicate EOF) to stdin
+8.3 write a test file, use indirection to test EOF and exit
+./myShell < test_exit
+./myShell < test_EOF
+
+For step2
+9.take arguments without execution to check if each argumented is specified correctly
+this could be done by just uncomment "#define cmd_args" in testing options regions in the shell.cpp, it will print all command arguments(with their lengths) ,paths in ECE551PATH and exported environment variable.
+9.1 no argument
+9.1.1 same as 4
+9.1.2 space:"  \n "
+9.1.3 backslash-spc: "\ \ \n ", "  \ \ \   \\n"
+9.2 single argument
+9.2.1 no space:"a\b\n"
+9.2.2 space:"  a\b\n","  a\b   \n"
+9.2.3 backslash-spc:"  \ \  a\b\ \   \ \   \n","  a b\ \  d\n"," a\b \\n"
+9.3 multiple arguments
+9.3.1 space:"  a  b   c   d  \n"
+9.3.2 backslash-spc:"  \ \  \ a\ \b\  \ cd  \ \n"
+
+10.execute program with arguments
+10.1 absolute path
+"/bin/ls -a ..", "/bin/ps aux"
+10.2 relative path
+"ls -a ..", "grep 9 TESTCASE", "ps aux"
+
+11. test program path ECE551PATH
+11.1 echo $ECE551PATH
+11.2 test program in paths in ECE551PATH(same as 2.) and program not in it(same as 3.)
+11.3 update ECE551PATH
+clear ECE551PATH by set ECE551PATH with no value, then try previous programs such as ls, pwd, ps
+set temp $ECE551PATH
+set ECE551PATH
+ls
+11.4 add current directory to ECE551PATH, and run "print_args" in the other directory
+set ECE551PATH $temp
+set ECE551PATH $ECE551PATH:/home/zw154/ece551/mp_miniproject/shell (it depens on your own working directory)
+print_args (NB: unlike a real shell which runs "./print_args", my shell run directly "print_args")
+
+For step3
+12.usage of set
+set var value: $var=value
+set var: $var=
+set: print all var=val, one per line
+to test the translation from $var to value
+set a ls
+set b .
+set c .
+set d $a
+set e a
+12.1 $a $b.
+12.2 $a -a $b$c
+12.3 $d
+12.4 $$e
+12.5 test set without any argument to check if the print works
+set
+12.6 test set var without value for clear value of a variable
+set a
+Notice if you don't want to run the program but to see if the translation works (aka you type command with $s, it
+responds to you with the translated line), you can uncomment "#define line_translation"
+
+13.usage of export
+export var1 var2 ...
+13.1 export a variable which has been set but not export
+set f 100
+env f
+export f
+a
+13.2 export a variable which has been set and export previously
+set f 100
+export f
+set f 200
+export f
+env
+13.3 export a variable which is not set and not export
+export g
+13.4 export a variable which is not set but export previously
+export g
+
+test this by command "env" which prints all exported var=value
+env
+
+14.usage of inc
+inc var
+14.1 inc without any argument: inc
+14.2 inc a variable with value of base-10 number:
+set a 10
+inc a
+set
+14.3 inc a variable with value not of base-10:
+set a f123f
+inc a
+set
+14.4 inc a variable not set yet
+inc b
+set
+14.5 inc with multiple arguments
+inc a b c
+
+15.cd command
+15.1 cd witout any argument
+15.2 cd [absolute path]
+15.3 cd [relative path]
+15.4 cd ~
+15.5 cd .
+15.6 cd ..
+test if the shell runs program correctly, we could enter other directory and run programs
+e.g. cd ~/ece551/mp_miniproject
+16.7 ls -a ..
+16.8 cat shell/README
+Notice my shell could not run program in the form of ./program, ../program (it doesn't replace
+the . and .. with corresponding directory), so if we want to run programs in other directories and
+not under ECE551PATH, we have to type the absolute path.
